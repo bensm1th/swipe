@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { View, Animated, PanResponder, Dimensions, StyleSheet } from 'react-native';
+import { 
+    View, 
+    Animated, 
+    PanResponder, 
+    Dimensions, 
+    StyleSheet,
+    LayoutAnimation,
+    UIManager
+} from 'react-native';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
@@ -44,6 +52,21 @@ class Deck extends Component {
         //we could assign the panResponder to our state object, but we don't ever call set state on item
         //so, we don't have to assign it to state
         //we could do: this.panResponder = panResponder
+    }
+
+    componentWillReceiveProps(nextProps) {
+        //called when component is about to be rerendered with a new set of props;
+        //if the new props aren't equal to the current props, reset the index to zero, 
+        // that way it will render first card instead of the last one, which was the previous index
+        //because we had gone all the way through the cardstack
+        if (nextProps.data !== this.props.data) {
+            this.setState({ index: 0 });
+        }
+    }
+
+    componentWillUpdate() {
+        UIManager.setLayoutAnimationEnabledExperimental && UIManager.setLayoutAnimationEnabledExperimental(true);
+        LayoutAnimation.spring();
     }
 
     resetPosition() {
@@ -107,7 +130,10 @@ class Deck extends Component {
                 );
             } 
             return (
-                <Animated.View style={styles.cardStyle} key={item.id}>
+                <Animated.View 
+                    style={[styles.cardStyle, { top: 5 * (i - this.state.index) }]} 
+                    key={item.id}
+                >
                     {this.props.renderCard(item)}
                 </Animated.View>
                 );
